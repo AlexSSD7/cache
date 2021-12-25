@@ -1,6 +1,6 @@
 # cache
 
-CDN-like, middleware memory cache for Go application with integrated shielding and Go 1.18 Generics.
+CDN-like, middleware memory cache for Go applications with integrated shielding and Go 1.18 Generics.
 
 ## Usage
 
