@@ -156,3 +156,10 @@ func (s *ShieldedCache[T]) Usage() (int, int) {
 
 	return objectsLen, shieldsLen
 }
+
+func (s *ShieldedCache[T]) DeleteObject(key string) {
+	s.objectsMu.Lock()
+	defer s.objectsMu.Unlock()
+
+	delete(s.objects, key)
+}
