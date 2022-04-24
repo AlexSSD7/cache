@@ -49,6 +49,12 @@ func NewShieldedCache[T any](gcInterval time.Duration) *ShieldedCache[T] {
 // Fetch is the main read-write cache that acts as a middleware between actual fetch function
 // and the application, creating a cache layer in between.
 func (s *ShieldedCache[T]) Fetch(key string, ttl time.Duration, fetchFunc func() (T, error)) (*CacheEntry[T], bool, error) {
+	if atomic.LoadUint32(&s.workerRunning) == 0 {
+		// Ensuring that the worker is running to prevent
+		// possible memory leak as GC not being active.
+		return nil, false, ErrWorkerNotRunning
+	}
+
 	s.shieldsMu.Lock()
 	shield := s.shields[key]
 	if shield == nil {

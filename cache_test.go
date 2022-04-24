@@ -34,8 +34,6 @@ func TestShieldedCacheTTL(t *testing.T) {
 		verifyEmptyCache(c, t)
 	}()
 
-	require.NoError(c.StartWorker(ctx))
-
 	var u uint64
 
 	fetchFunc := func() (uint64, error) {
@@ -46,7 +44,15 @@ func TestShieldedCacheTTL(t *testing.T) {
 		return u, nil
 	}
 
+	// Make sure that all fetches fail if no worker is running
 	res, hit, err := c.Fetch("test", time.Second*2, fetchFunc)
+	require.False(hit)
+	require.ErrorIs(err, ErrWorkerNotRunning)
+	require.Nil(res)
+
+	require.NoError(c.StartWorker(ctx))
+
+	res, hit, err = c.Fetch("test", time.Second*2, fetchFunc)
 	require.False(hit)
 	require.NoError(err)
 	require.Equal(res.Data, uint64(1))
